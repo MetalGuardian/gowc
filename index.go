@@ -3,7 +3,6 @@ package main
 import (
 	"net/http"
 	"github.com/gin-gonic/gin"
-	"fmt"
 	"golang.org/x/net/html"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
@@ -66,7 +65,7 @@ func main() {
 
 	r := gin.Default()
 	r.GET("/", index)
-	r.GET("/parse", parse)
+	r.POST("/parse", parse)
 	r.GET("/parse/:id", getJob)
 	r.Run(":8080")
 }
@@ -83,28 +82,22 @@ func getJob(c *gin.Context) {
 }
 
 func selectJob(id string) (data Job, err error) {
-	data = Job{Id: id, Url: ""}
 
-	rows, err := db.Query("SELECT id, url, status FROM url WHERE id = ?", id)
+	var uid int
+	var url string
+	var status int
+
+	err = db.QueryRow("SELECT id, url, status FROM url WHERE id = ?", id).Scan(&uid, &url, &status)
 	if err != nil {
-		return Job{}, err
+		return Job{}, &Error{Msg:"job not found", Err: err}
 	}
 
-	for rows.Next() {
-		var uid int
-		var url string
-		var status int
-		err = rows.Scan(&uid, &url, &status)
-		if err != nil {
-			return Job{}, err
-		}
-		data.Url = url
-		data.Status = linkStatus(status)
+	data.Url = url
+	data.Status = linkStatus(status)
 
-		data, err = selectImages(id, data)
-		if err != nil {
-			return Job{}, err
-		}
+	data, err = selectImages(id, data)
+	if err != nil {
+		return Job{}, err
 	}
 
 	return data, nil
@@ -409,6 +402,7 @@ func downloadImage(imageUrl string, u *url.URL, id int64) error {
 
 
 	ifile, err := os.Open(fileName)
+	defer ifile.Close();
 	if err != nil {
 		imageStatusDimension(imageId)
 		return err
