@@ -190,9 +190,7 @@ func index(c *gin.Context) {
 }
 
 func parse(c *gin.Context) {
-	link := "http://fie.org/fie/structure/manufacturers"
-	//link = "http://www.zaryachem.com/ru"
-	//link = "http://vintage.com.ua"
+	link := c.PostForm("link")
 
 	u, err := url.Parse(link)
 	if err != nil {
