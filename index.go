@@ -348,7 +348,7 @@ func imageUpdateSize(id int64, size int64) {
 }
 
 func imageUpdateDimension(id int64, width int, height int) {
-	stmt, err := db.Prepare("UPDATE image SET width = ? AND height = ? WHERE id = ?")
+	stmt, err := db.Prepare("UPDATE image SET width = ?, height = ? WHERE id = ?")
 	checkError(err)
 	res, err := stmt.Exec(width, height, id)
 	checkError(err)
@@ -407,10 +407,15 @@ func downloadImage(imageUrl string, u *url.URL, id int64) error {
 
 	imageUpdateSize(imageId, info.Size())
 
-	imageConfig, _, err := image.DecodeConfig(file)
+
+	ifile, err := os.Open(fileName)
 	if err != nil {
 		imageStatusDimension(imageId)
-		fmt.Println(err)
+		return err
+	}
+	imageConfig, _, err := image.DecodeConfig(ifile)
+	if err != nil {
+		imageStatusDimension(imageId)
 		return err
 	}
 
