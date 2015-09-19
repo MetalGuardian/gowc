@@ -67,6 +67,9 @@ func main() {
 	r.GET("/", index)
 	r.POST("/parse", parse)
 	r.GET("/parse/:id", getJob)
+	r.NoRoute(func (c *gin.Context) {
+		c.JSON(404, gin.H{"error": "page not found"})
+	})
 	r.Run(":8080")
 }
 
