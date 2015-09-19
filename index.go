@@ -41,7 +41,7 @@ type Job struct {
 }
 
 type JobImage struct {
-	Id string
+	Id string `json:"id"`
 	Url string `json:"url"`
 	Link string `json:"link"`
 	Status string `json:"status"`
@@ -73,12 +73,12 @@ func getJob(c *gin.Context) {
 	c.JSON(200, json)
 }
 
-func selectJob(id string) (data *Job, err error) {
-	data = &Job{Id: id, Url: ""}
+func selectJob(id string) (data Job, err error) {
+	data = Job{Id: id, Url: ""}
 
 	rows, err := db.Query("SELECT id, url, status FROM url WHERE id = ?", id)
 	if err != nil {
-		return nil, err
+		return Job{}, err
 	}
 
 	for rows.Next() {
@@ -87,23 +87,22 @@ func selectJob(id string) (data *Job, err error) {
 		var status int
 		err = rows.Scan(&uid, &url, &status)
 		if err != nil {
-			return nil, err
+			return Job{}, err
 		}
 		data.Url = url
 		data.Status = linkStatus(status)
 
-		data.Images, err = selectImages(id)
+		data, _ = selectImages(id, data)
 	}
 
 	return data, nil
 }
 
-func selectImages(id string) (data []JobImage, err error) {
-	data = []JobImage{}
+func selectImages(id string, job Job) (Job, error) {
 
 	rows, err := db.Query("SELECT id, url, link, status FROM image WHERE url_id = ?", id)
 	if err != nil {
-		return nil, err
+		return Job{}, err
 	}
 
 	for rows.Next() {
@@ -113,15 +112,20 @@ func selectImages(id string) (data []JobImage, err error) {
 		var status int
 		err = rows.Scan(&uid, &url, &link, &status)
 		if err != nil {
-			return nil, err
+			return Job{}, err
 		}
-		data[1].Url = url
-		data[1].Status = linkStatus(status)
 
+		var temp JobImage
 
+		temp.Url = url
+		temp.Status = linkStatus(status)
+
+		job.Images = append(job.Images, temp)
 	}
 
-	return data, nil
+	fmt.Println(job)
+
+	return job, nil
 }
 
 func linkStatus(status int) string {
