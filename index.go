@@ -45,6 +45,10 @@ type JobImage struct {
 	Url string `json:"url"`
 	Link string `json:"link"`
 	Status string `json:"status"`
+	Type string `json:"type"`
+	Size int `json:"size"`
+	Height int `json:"height"`
+	Width int `json:"width"`
 }
 
 func main() {
@@ -92,7 +96,10 @@ func selectJob(id string) (data Job, err error) {
 		data.Url = url
 		data.Status = linkStatus(status)
 
-		data, _ = selectImages(id, data)
+		data, err = selectImages(id, data)
+		if err != nil {
+			return Job{}, err
+		}
 	}
 
 	return data, nil
@@ -100,8 +107,9 @@ func selectJob(id string) (data Job, err error) {
 
 func selectImages(id string, job Job) (Job, error) {
 
-	rows, err := db.Query("SELECT id, url, link, status FROM image WHERE url_id = ?", id)
+	rows, err := db.Query("SELECT id, url, link, status, type, size, height, width FROM image WHERE url_id = ?", id)
 	if err != nil {
+		fmt.Println(err)
 		return Job{}, err
 	}
 
@@ -110,15 +118,24 @@ func selectImages(id string, job Job) (Job, error) {
 		var url string
 		var link string
 		var status int
-		err = rows.Scan(&uid, &url, &link, &status)
+		var typeField string
+		var size int
+		var height int
+		var width int
+		err = rows.Scan(&uid, &url, &link, &status, &typeField, &size, &height, &width)
 		if err != nil {
+			fmt.Println(err)
 			return Job{}, err
 		}
 
 		var temp JobImage
 
 		temp.Url = url
-		temp.Status = linkStatus(status)
+		temp.Status = imageStatus(status)
+		temp.Size = 0
+		temp.Height = 0
+		temp.Width = 0
+		temp.Type = "testing"
 
 		job.Images = append(job.Images, temp)
 	}
@@ -137,6 +154,23 @@ func linkStatus(status int) string {
 	case statusErrorLoad:
 		return "error loading link"
 	case statusDone:
+		return "done"
+	}
+
+	return "Unknown status"
+}
+
+func imageStatus(status int) string {
+	switch status {
+	case imageStatusProcessing:
+		return "processing"
+	case imageStatusErrorLink:
+		return "error link"
+	case imageStatusErrorLoad:
+		return "error loading"
+	case imageStatusErrorSave:
+		return "error saving"
+	case imageStatusDone:
 		return "done"
 	}
 
@@ -183,9 +217,9 @@ func insertUrl(url string) int64 {
 }
 
 func insertImageUrl(url string, urlId int64) int64 {
-	stmt, err := db.Prepare("INSERT INTO image(link, url_id) values(?, ?)")
+	stmt, err := db.Prepare("INSERT INTO image(link, url_id, url, status, link, type, size, height, width) values(?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	checkError(err)
-	res, err := stmt.Exec(url, urlId)
+	res, err := stmt.Exec(url, urlId, "", imageStatusProcessing, "", "", 0, 0, 0)
 	checkError(err)
 	id, err := res.LastInsertId()
 	checkError(err)
