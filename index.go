@@ -42,7 +42,9 @@ type Job struct {
 
 type JobImage struct {
 	Id string
-	Query string
+	Url string `json:"url"`
+	Link string `json:"link"`
+	Status string `json:"status"`
 }
 
 func main() {
@@ -72,9 +74,9 @@ func getJob(c *gin.Context) {
 }
 
 func selectJob(id string) (data *Job, err error) {
-	data = &Job{Id: id, Url: "testing"}
+	data = &Job{Id: id, Url: ""}
 
-	rows, err := db.Query("SELECT * FROM url WHERE id = ?", id)
+	rows, err := db.Query("SELECT id, url, status FROM url WHERE id = ?", id)
 	if err != nil {
 		return nil, err
 	}
@@ -83,12 +85,40 @@ func selectJob(id string) (data *Job, err error) {
 		var uid int
 		var url string
 		var status int
-		err = rows.Scan(&status, &uid, &url)
+		err = rows.Scan(&uid, &url, &status)
 		if err != nil {
 			return nil, err
 		}
 		data.Url = url
 		data.Status = linkStatus(status)
+
+		data.Images, err = selectImages(id)
+	}
+
+	return data, nil
+}
+
+func selectImages(id string) (data []JobImage, err error) {
+	data = []JobImage{}
+
+	rows, err := db.Query("SELECT id, url, link, status FROM image WHERE url_id = ?", id)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var uid int
+		var url string
+		var link string
+		var status int
+		err = rows.Scan(&uid, &url, &link, &status)
+		if err != nil {
+			return nil, err
+		}
+		data[1].Url = url
+		data[1].Status = linkStatus(status)
+
+
 	}
 
 	return data, nil
