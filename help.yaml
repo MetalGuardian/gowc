@@ -16,36 +16,22 @@ paths:
       description: |
         Description.
       parameters:
-        - name: latitude
-          in: query
-          description: Latitude component of location.
+        - name: url
+          in: post
+          description: desc.
           required: true
-          type: number
-          format: double
-        - name: longitude
-          in: query
-          description: Longitude component of location.
-          required: true
-          type: number
-          format: double
-      tags:
-        - Products
+          type: string
+          format: url
       responses:
         '200':
           description: An array of products
           schema:
             type: array
-            items:
-              $ref: '#/definitions/Product'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
 definitions:
-  Product:
+  Parsers:
     type: object
     properties:
-      product_id:
+      id:
         type: string
         description: 'Unique identifier representing a specific product for a given latitude & longitude. For example, uberX in San Francisco will have a different product_id than uberX in Los Angeles.'
       description:

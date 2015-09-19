@@ -26,6 +26,7 @@ const imageStatusDone = 1
 const imageStatusErrorLink = 2
 const imageStatusErrorLoad = 3
 const imageStatusErrorSave = 4
+const imageStatusErrorSize = 5
 
 type Error struct {
 	Msg  string
@@ -41,7 +42,6 @@ type Job struct {
 }
 
 type JobImage struct {
-	Id string `json:"id"`
 	Url string `json:"url"`
 	Link string `json:"link"`
 	Status string `json:"status"`
@@ -118,11 +118,11 @@ func selectImages(id string, job Job) (Job, error) {
 		var url string
 		var link string
 		var status int
-		var typeField string
+		var contentType string
 		var size int
 		var height int
 		var width int
-		err = rows.Scan(&uid, &url, &link, &status, &typeField, &size, &height, &width)
+		err = rows.Scan(&uid, &url, &link, &status, &contentType, &size, &height, &width)
 		if err != nil {
 			fmt.Println(err)
 			return Job{}, err
@@ -131,11 +131,12 @@ func selectImages(id string, job Job) (Job, error) {
 		var temp JobImage
 
 		temp.Url = url
+		temp.Link = link
 		temp.Status = imageStatus(status)
-		temp.Size = 0
-		temp.Height = 0
-		temp.Width = 0
-		temp.Type = "testing"
+		temp.Size = size
+		temp.Height = height
+		temp.Width = width
+		temp.Type = contentType
 
 		job.Images = append(job.Images, temp)
 	}
@@ -170,6 +171,8 @@ func imageStatus(status int) string {
 		return "error loading"
 	case imageStatusErrorSave:
 		return "error saving"
+	case imageStatusErrorSize:
+		return "error size"
 	case imageStatusDone:
 		return "done"
 	}
@@ -299,6 +302,10 @@ func imageStatusSetDone (id int64) {
 	imageUpdateStatus(id, imageStatusDone)
 }
 
+func imageStatusSize (id int64) {
+	imageUpdateStatus(id, imageStatusErrorSize)
+}
+
 func imageUpdateStatus(id int64, status int) {
 	stmt, err := db.Prepare("UPDATE image SET status = ? WHERE id = ?")
 	checkError(err)
@@ -312,6 +319,24 @@ func imageUpdateUrl(id int64, url string) {
 	stmt, err := db.Prepare("UPDATE image SET url = ? WHERE id = ?")
 	checkError(err)
 	res, err := stmt.Exec(url, id)
+	checkError(err)
+	id, err = res.LastInsertId()
+	checkError(err)
+}
+
+func imageUpdateType(id int64, contentType string) {
+	stmt, err := db.Prepare("UPDATE image SET type = ? WHERE id = ?")
+	checkError(err)
+	res, err := stmt.Exec(contentType, id)
+	checkError(err)
+	id, err = res.LastInsertId()
+	checkError(err)
+}
+
+func imageUpdateSize(id int64, size int64) {
+	stmt, err := db.Prepare("UPDATE image SET size = ? WHERE id = ?")
+	checkError(err)
+	res, err := stmt.Exec(size, id)
 	checkError(err)
 	id, err = res.LastInsertId()
 	checkError(err)
@@ -334,6 +359,9 @@ func downloadImage(image string, u *url.URL, id int64) error {
 		return err
 	}
 
+	contentType := resp.Header.Get("Content-Type")
+	imageUpdateType(imageId, contentType)
+
 	ext := path.Ext(imageLink)
 
 	imageBody, err := ioutil.ReadAll(resp.Body)
@@ -342,7 +370,9 @@ func downloadImage(image string, u *url.URL, id int64) error {
 	os.Mkdir("./files/", 0777)
 	os.Mkdir("./files/" + strconv.FormatInt(id, 10), 0777)
 
-	file, err := os.OpenFile("./files/" + strconv.FormatInt(id, 10) + "/" + strconv.FormatInt(imageId, 10) + ext, os.O_CREATE | os.O_RDWR, 0666)
+	fileName := "./files/" + strconv.FormatInt(id, 10) + "/" + strconv.FormatInt(imageId, 10) + ext
+
+	file, err := os.OpenFile(fileName, os.O_CREATE | os.O_RDWR, 0666)
 	defer file.Close()
 	if err != nil {
 		imageStatusSave(imageId)
@@ -354,6 +384,14 @@ func downloadImage(image string, u *url.URL, id int64) error {
 		imageStatusSave(imageId)
 		return err
 	}
+
+	info, err := os.Lstat(fileName)
+	if err != nil {
+		imageStatusSize(imageId)
+		return err
+	}
+
+	imageUpdateSize(imageId, info.Size())
 
 	imageStatusSetDone(imageId)
 
