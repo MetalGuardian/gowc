@@ -12,6 +12,10 @@ import (
 	"os"
 	"strconv"
 	"path"
+	"image"
+	_ "image/gif"
+	_ "image/png"
+	_ "image/jpeg"
 )
 
 var db, dbError = sql.Open("mysql", "root:@tcp(localhost:3306)/gowc?charset=utf8")
@@ -27,6 +31,7 @@ const imageStatusErrorLink = 2
 const imageStatusErrorLoad = 3
 const imageStatusErrorSave = 4
 const imageStatusErrorSize = 5
+const imageStatusErrorDimension = 6
 
 type Error struct {
 	Msg  string
@@ -109,7 +114,6 @@ func selectImages(id string, job Job) (Job, error) {
 
 	rows, err := db.Query("SELECT id, url, link, status, type, size, height, width FROM image WHERE url_id = ?", id)
 	if err != nil {
-		fmt.Println(err)
 		return Job{}, err
 	}
 
@@ -124,7 +128,6 @@ func selectImages(id string, job Job) (Job, error) {
 		var width int
 		err = rows.Scan(&uid, &url, &link, &status, &contentType, &size, &height, &width)
 		if err != nil {
-			fmt.Println(err)
 			return Job{}, err
 		}
 
@@ -140,8 +143,6 @@ func selectImages(id string, job Job) (Job, error) {
 
 		job.Images = append(job.Images, temp)
 	}
-
-	fmt.Println(job)
 
 	return job, nil
 }
@@ -173,6 +174,8 @@ func imageStatus(status int) string {
 		return "error saving"
 	case imageStatusErrorSize:
 		return "error size"
+	case imageStatusErrorDimension:
+		return "error dimension"
 	case imageStatusDone:
 		return "done"
 	}
@@ -247,8 +250,6 @@ func grab(u *url.URL, id int64) error {
 
 	complete(id)
 
-	fmt.Println(id)
-
 	return nil
 }
 
@@ -306,6 +307,10 @@ func imageStatusSize (id int64) {
 	imageUpdateStatus(id, imageStatusErrorSize)
 }
 
+func imageStatusDimension (id int64) {
+	imageUpdateStatus(id, imageStatusErrorDimension)
+}
+
 func imageUpdateStatus(id int64, status int) {
 	stmt, err := db.Prepare("UPDATE image SET status = ? WHERE id = ?")
 	checkError(err)
@@ -342,11 +347,20 @@ func imageUpdateSize(id int64, size int64) {
 	checkError(err)
 }
 
-func downloadImage(image string, u *url.URL, id int64) error {
+func imageUpdateDimension(id int64, width int, height int) {
+	stmt, err := db.Prepare("UPDATE image SET width = ? AND height = ? WHERE id = ?")
+	checkError(err)
+	res, err := stmt.Exec(width, height, id)
+	checkError(err)
+	id, err = res.LastInsertId()
+	checkError(err)
+}
 
-	imageId := insertImageUrl(image, id)
+func downloadImage(imageUrl string, u *url.URL, id int64) error {
 
-	imageLink, err := createImageLink(image, u)
+	imageId := insertImageUrl(imageUrl, id)
+
+	imageLink, err := createImageLink(imageUrl, u)
 	if err != nil {
 		imageStatusLink(imageId)
 		return err
@@ -392,6 +406,15 @@ func downloadImage(image string, u *url.URL, id int64) error {
 	}
 
 	imageUpdateSize(imageId, info.Size())
+
+	imageConfig, _, err := image.DecodeConfig(file)
+	if err != nil {
+		imageStatusDimension(imageId)
+		fmt.Println(err)
+		return err
+	}
+
+	imageUpdateDimension(imageId, imageConfig.Width, imageConfig.Height)
 
 	imageStatusSetDone(imageId)
 
