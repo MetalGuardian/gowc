@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"golang.org/x/net/html"
 	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -14,7 +14,7 @@ import (
 	"path"
 )
 
-var db, dbError = sql.Open("sqlite3", "./database.db")
+var db, dbError = sql.Open("mysql", "root:@tcp(localhost:3306)/gowc?charset=utf8")
 
 const statusProcessing = 0
 const statusDone = 1
@@ -217,9 +217,9 @@ func insertUrl(url string) int64 {
 }
 
 func insertImageUrl(url string, urlId int64) int64 {
-	stmt, err := db.Prepare("INSERT INTO image(link, url_id, url, status, link, type, size, height, width) values(?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO image(link, url_id, url, status, type, size, height, width) values(?, ?, ?, ?, ?, ?, ?, ?)")
 	checkError(err)
-	res, err := stmt.Exec(url, urlId, "", imageStatusProcessing, "", "", 0, 0, 0)
+	res, err := stmt.Exec(url, urlId, "", imageStatusProcessing, "", 0, 0, 0)
 	checkError(err)
 	id, err := res.LastInsertId()
 	checkError(err)
