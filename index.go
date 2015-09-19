@@ -109,6 +109,7 @@ func selectJob(id string) (data Job, err error) {
 func selectImages(id string, job Job) (Job, error) {
 
 	rows, err := db.Query("SELECT id, url, link, status, type, size, height, width FROM image WHERE url_id = ?", id)
+	defer rows.Close()
 	if err != nil {
 		return Job{}, err
 	}
