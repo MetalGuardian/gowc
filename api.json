@@ -6,7 +6,7 @@
       {
         "jsondocId": "20ad12be-bddb-4177-92c0-d7dd10e6fe2e",
         "name": "parse services",
-        "description": "Methods for managing parse",
+        "description": "Methods for managing parsers jobs",
         "visibility": "UNDEFINED",
         "stage": "UNDEFINED",
         "group": "Parsing",
@@ -222,7 +222,7 @@
               "oneLineText": "string"
             },
             "name": "download",
-            "description": "The local url for image",
+            "description": "The local url for image, you can download it",
             "required": "true"
           },
           {

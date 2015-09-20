@@ -33,3 +33,13 @@ curl -H "Content-Type: application/json" -X POST -d '{"link":"http://google.com.
 #{"id":1,"link":"http://google.com.ua/","message":"processing"}
 curl http://localhost:8080/parsers/1
 ```
+
+Known things
+
+1. About separated jobs. I use goroutines, so they don't depend on performance much. Parse requests take ~40ms,
+read requests take ~2ms. All grabber tasks do in workers.
+
+2. There is a thing about relative image links on the page. I think they won't work.
+
+3. Application can grab a lot of images, but now I don't implement any queue of grabbing tasks and
+now they have no limit per second or some other limitations.
