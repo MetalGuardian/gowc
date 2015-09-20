@@ -80,7 +80,7 @@ func main() {
 		c.Header("Access-Control-Allow-Headers", "origin, content-type, accept")
 		c.File("./api.json")
 	})
-	r.Static("/docs", "./docs")
+	r.Static("/info", "./info")
 	r.Static("/files", "./files")
 	r.Run(":8080")
 }
@@ -205,7 +205,7 @@ func checkError(err error) {
 }
 
 func index(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"use": []string{"http://localhost:8080/docs/"}, "message": "Hey! You can use such links"})
+	c.JSON(http.StatusOK, gin.H{"use": []string{"http://localhost:8080/info/"}, "message": "Hey! You can use such links"})
 }
 
 func parse(c *gin.Context) {
