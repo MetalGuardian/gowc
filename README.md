@@ -8,7 +8,7 @@ You can build docker container like this (in my application path):
 
 ```
 docker build -t gotest .
-docker run -p 8080:8080 -v (pwd):/go gotest
+docker run -p 8080:8080 -v `(pwd)`:/go gotest
 ```
 
 Or you can pull my prepared container
@@ -18,3 +18,18 @@ docker run -p 8080:8080 -v `(pwd)`:/go metalguardian/gotest
 ```
 
 Then you can go to the browser [http://localhost:8080/](http://localhost:8080/)
+
+You can see API documentation and clint on the [http://localhost:8080/info/](http://localhost:8080/info/).
+
+Here you can see how to use my application, try api requests and watch results
+[![Screenshot](info.png)](http://localhost:8080/info/)
+
+Or you can run curl queries:
+
+```
+curl http://localhost:8080/
+#{"message":"Hey! You can use such links","use":["http://localhost:8080/info/"]}
+curl -H "Content-Type: application/json" -X POST -d '{"link":"http://google.com.ua/"}' http://localhost:8080/parsers
+#{"id":1,"link":"http://google.com.ua/","message":"processing"}
+curl http://localhost:8080/parsers/1
+```

@@ -12,7 +12,11 @@ RUN echo "deb http://repo.mysql.com/apt/ubuntu/ $(lsb_release -cs) mysql-${MYSQL
 RUN apt-get update
 
 # install all packages
-RUN DEBIAN_FRONTEND=noninteractive apt-get -y -q --no-install-recommends install mysql-server mysql-client
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y -q --no-install-recommends install \
+    mysql-server \
+    mysql-client \
+    ca-certificates \
+    curl
 
 EXPOSE 8080
 
@@ -24,6 +28,9 @@ COPY ./gowc /go/
 
 COPY ./dump.sql /go/
 
+ENV PATH /go:$PATH
+WORKDIR /go
+
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
-CMD ["/go/gowc"]
+CMD ["gowc"]
