@@ -17,6 +17,7 @@ import (
 	_ "image/jpeg"
 )
 
+var connectionString = os.Getenv("connectionString")
 var db, dbError = sql.Open("mysql", "root:@tcp(localhost:3306)/gowc?charset=utf8")
 
 const statusProcessing = 0
@@ -55,6 +56,10 @@ type JobImage struct {
 	Width int `json:"width"`
 }
 
+type Request struct {
+	Link string `json:"link"`
+}
+
 func main() {
 
 	db.Ping()
@@ -65,23 +70,30 @@ func main() {
 
 	r := gin.Default()
 	r.GET("/", index)
-	r.POST("/parse", parse)
-	r.GET("/parse/:id", getJob)
+	r.POST("/parsers", parse)
+	r.GET("/parsers/:id", getJob)
 	r.NoRoute(func (c *gin.Context) {
-		c.JSON(404, gin.H{"error": "page not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "page not found"})
+	})
+	r.Any("/api.json", func (c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Headers", "origin, content-type, accept")
+		c.File("./api.json")
 	})
 	r.Run(":8080")
 }
 
 func getJob(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Headers", "origin, content-type, accept")
 	id := c.Param("id")
 	json, err := selectJob(id)
 	if err != nil {
-		c.JSON(400, gin.H{"message": "error", "error": err})
+		c.JSON(http.StatusNotFound, gin.H{"message": "error", "error": err})
 		return
 	}
 
-	c.JSON(200, json)
+	c.JSON(http.StatusOK, json)
 }
 
 func selectJob(id string) (data Job, err error) {
@@ -187,11 +199,21 @@ func checkError(err error) {
 }
 
 func index(c *gin.Context) {
-	c.JSON(200, gin.H{"message": "Hey"})
+	c.JSON(http.StatusOK, gin.H{"use": []string{"http://localhost:8080/api"}, "message": "Hey! You can use such links"})
 }
 
 func parse(c *gin.Context) {
-	link := c.PostForm("link")
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Headers", "origin, content-type, accept")
+
+	var json Request
+	err := c.BindJSON(&json)
+	if err != nil || json.Link == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Incrorrect request"})
+		return
+	}
+
+	link := json.Link
 
 	u, err := url.Parse(link)
 	if err != nil {
@@ -203,7 +225,7 @@ func parse(c *gin.Context) {
 
 	go grab(u, id)
 
-	c.JSON(200, gin.H{"message": "processing", "jobId": id})
+	c.JSON(http.StatusCreated, gin.H{"message": "processing", "jobId": id, "link": link})
 }
 
 func insertUrl(url string) int64 {

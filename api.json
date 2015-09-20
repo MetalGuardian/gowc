@@ -1,0 +1,130 @@
+{
+  "version": "1.0",
+  "basePath": "http://localhost:8080",
+  "apis": {
+    "Parsing": [
+      {
+        "jsondocId": "20ad12be-bddb-4177-92c0-d7dd10e6fe2e",
+        "name": "parse services",
+        "description": "Methods for managing parse",
+        "visibility": "UNDEFINED",
+        "stage": "UNDEFINED",
+        "group": "Parsing",
+        "methods": [
+          {
+            "jsondocwarnings": [
+              "Missing documentation data: consumes"
+            ],
+            "jsondocId": "4dc126ea-ad19-4456-8d3c-9f0463b65d87",
+            "path": [
+              "/parsers"
+            ],
+            "verb": [
+              "POST"
+            ],
+            "produces": [
+              "application/json",
+              "text"
+            ],
+            "bodyobject": {
+              "jsondocType": {
+                "type": [
+                  "city"
+                ],
+                "oneLineText": "city"
+              },
+              "jsondocTemplate": {
+                "name": "",
+                "population": 0,
+                "square_km": 0
+              }
+            },
+            "response": {
+              "jsondocId": "e6a39d93-1034-4a07-b773-0ad797f7e110",
+              "jsondocType": {
+                "type": [
+                  "city"
+                ],
+                "oneLineText": "city"
+              }
+            },
+            "responsestatuscode": "201 - Created",
+            "visibility": "UNDEFINED",
+            "stage": "UNDEFINED",
+            "description": "Created parse job",
+            "apierrors": [
+              {
+                "jsondocId": "fdc2de36-f713-4ee8-bd3d-bee2fc9db436",
+                "code": "3000",
+                "description": "City already existing"
+              },
+              {
+                "jsondocId": "80b91dd6-d28e-45f7-88ac-2d97faa7b20a",
+                "code": "9000",
+                "description": "Illegal argument"
+              }
+            ],
+            "supportedversions": {
+              "since": "1.0"
+            },
+            "displayMethodAs": "URI",
+            "displayedMethodString": [
+              "/parses"
+            ]
+          },
+          {
+            "jsondocId": "d453b093-b696-4c04-a143-f44457146e76",
+            "path": [
+              "/parsers/{id}"
+            ],
+            "verb": [
+              "GET"
+            ],
+            "produces": [
+              "application/json"
+            ],
+            "pathparameters": [
+              {
+                "jsondocId": "f591817e-ef6c-4fd4-9682-385c0648f8e2",
+                "jsondocType": {
+                  "type": [
+                    "integer"
+                  ],
+                  "oneLineText": "integer"
+                },
+                "name": "id",
+                "description": "The city ID",
+                "required": "true"
+              }
+            ],
+            "response": {
+              "jsondocId": "dd17de48-f331-42ff-9785-d204c41fe93c",
+              "jsondocType": {
+                "type": [
+                  "city"
+                ],
+                "oneLineText": "city"
+              }
+            },
+            "responsestatuscode": "200 - OK",
+            "visibility": "UNDEFINED",
+            "stage": "UNDEFINED",
+            "description": "Gets a parsing job by its ID",
+            "supportedversions": {
+              "since": "1.0"
+            },
+            "displayMethodAs": "URI",
+            "displayedMethodString": [
+              "/parsers/{id}"
+            ]
+          }
+        ],
+        "supportedversions": {
+          "since": "1.0"
+        }
+      }
+    ]
+  },
+  "playgroundEnabled": true,
+  "displayMethodAs": "URI"
+}
