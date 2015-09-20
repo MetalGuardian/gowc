@@ -298,6 +298,72 @@
           "height": 750,
           "width": 500
         }
+      },
+      {
+        "jsondocId": "85eaeea4-f41a-4bf7-af79-0ef343003b8a",
+        "name": "job",
+        "description": "An job object",
+        "fields": [
+          {
+            "jsondocId": "e7a17ed6-cf85-4fd8-95fc-ffead6a2d94d",
+            "jsondocType": {
+              "type": [
+                "integer"
+              ],
+              "oneLineText": "integer"
+            },
+            "name": "id",
+            "description": "The job ID",
+            "required": "true"
+          },
+          {
+            "jsondocId": "e7a27ac6-5f85-4ee8-95fc-afead6a2d94d",
+            "jsondocType": {
+              "type": [
+                "string"
+              ],
+              "oneLineText": "string"
+            },
+            "name": "url",
+            "description": "The parsing url",
+            "required": "true"
+          },
+          {
+            "jsondocId": "e7a17ac6-cf85-7fd8-95fc-afeac6a2d94d",
+            "jsondocType": {
+              "type": [
+                "string"
+              ],
+              "oneLineText": "string"
+            },
+            "name": "status",
+            "description": "The status of the whole parsing job",
+            "required": "true"
+          },
+          {
+            "jsondocId": "a1a17ac6-cf85-4dd8-95fc-afead6a2d94d",
+            "jsondocType": {
+              "type": [
+                "list",
+                "image"
+              ],
+              "oneLineText": "list of image"
+            },
+            "name": "images",
+            "description": "The list of parsed images",
+            "required": "true"
+          }
+        ],
+        "visibility": "UNDEFINED",
+        "stage": "UNDEFINED",
+        "jsondocTemplate": {
+          "id": 121,
+          "url": "http://lousybabe.tumblr.com/",
+          "status": "done",
+          "images": [
+
+          ]
+        }
       }
     ]
   },

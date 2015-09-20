@@ -40,7 +40,7 @@ type Error struct {
 func (e *Error) Error() string { return e.Msg + ": " + e.Err.Error() }
 
 type Job struct {
-	Id string `json:"id"`
+	Id int `json:"id"`
 	Url string `json:"url"`
 	Status string `json:"status"`
 	Images []JobImage `json:"images"`
@@ -49,6 +49,7 @@ type Job struct {
 type JobImage struct {
 	Url string `json:"url"`
 	Link string `json:"link"`
+	Download string `json:"download"`
 	Status string `json:"status"`
 	Type string `json:"type"`
 	Size int `json:"size"`
@@ -107,6 +108,7 @@ func selectJob(id string) (data Job, err error) {
 		return Job{}, &Error{Msg:"job not found", Err: err}
 	}
 
+	data.Id = uid
 	data.Url = url
 	data.Status = linkStatus(status)
 
@@ -144,6 +146,7 @@ func selectImages(id string, job Job) (Job, error) {
 
 		temp.Url = url
 		temp.Link = link
+		temp.Download = "http://localhost:8080/files/" + id + "/" + strconv.Itoa(uid) + ".jpg"
 		temp.Status = imageStatus(status)
 		temp.Size = size
 		temp.Height = height
