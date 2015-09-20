@@ -81,6 +81,8 @@ func main() {
 		c.Header("Access-Control-Allow-Headers", "origin, content-type, accept")
 		c.File("./api.json")
 	})
+	r.Static("/doc", "./doc")
+	r.Static("/files", "./files")
 	r.Run(":8080")
 }
 
@@ -122,7 +124,7 @@ func selectJob(id string) (data Job, err error) {
 
 func selectImages(id string, job Job) (Job, error) {
 
-	rows, err := db.Query("SELECT id, url, link, status, type, size, height, width FROM image WHERE url_id = ?", id)
+	rows, err := db.Query("SELECT id, url, link, status, type, size, height, width, ext, real_name FROM image WHERE url_id = ?", id)
 	defer rows.Close()
 	if err != nil {
 		return Job{}, err
@@ -137,7 +139,9 @@ func selectImages(id string, job Job) (Job, error) {
 		var size int
 		var height int
 		var width int
-		err = rows.Scan(&uid, &url, &link, &status, &contentType, &size, &height, &width)
+		var ext string
+		var name string
+		err = rows.Scan(&uid, &url, &link, &status, &contentType, &size, &height, &width, &ext, &name)
 		if err != nil {
 			return Job{}, err
 		}
@@ -146,7 +150,7 @@ func selectImages(id string, job Job) (Job, error) {
 
 		temp.Url = url
 		temp.Link = link
-		temp.Download = "http://localhost:8080/files/" + id + "/" + strconv.Itoa(uid) + ".jpg"
+		temp.Download = "http://localhost:8080/files/" + id + "/" + strconv.Itoa(uid) + ext
 		temp.Status = imageStatus(status)
 		temp.Size = size
 		temp.Height = height
@@ -243,9 +247,9 @@ func insertUrl(url string) int64 {
 }
 
 func insertImageUrl(url string, urlId int64) int64 {
-	stmt, err := db.Prepare("INSERT INTO image(link, url_id, url, status, type, size, height, width) values(?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO image(link, url_id, url, status, type, size, height, width, ext, real_name) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	checkError(err)
-	res, err := stmt.Exec(url, urlId, "", imageStatusProcessing, "", 0, 0, 0)
+	res, err := stmt.Exec(url, urlId, "", imageStatusProcessing, "", 0, 0, 0, "", "")
 	checkError(err)
 	id, err := res.LastInsertId()
 	checkError(err)
@@ -358,6 +362,15 @@ func imageUpdateType(id int64, contentType string) {
 	checkError(err)
 }
 
+func imageUpdateNameExt(id int64, name string, ext string) {
+	stmt, err := db.Prepare("UPDATE image SET real_name = ?, ext = ? WHERE id = ?")
+	checkError(err)
+	res, err := stmt.Exec(name, ext, id)
+	checkError(err)
+	id, err = res.LastInsertId()
+	checkError(err)
+}
+
 func imageUpdateSize(id int64, size int64) {
 	stmt, err := db.Prepare("UPDATE image SET size = ? WHERE id = ?")
 	checkError(err)
@@ -397,6 +410,9 @@ func downloadImage(imageUrl string, u *url.URL, id int64) error {
 	imageUpdateType(imageId, contentType)
 
 	ext := path.Ext(imageLink)
+	realName := path.Base(imageLink)
+
+	imageUpdateNameExt(imageId, realName, ext)
 
 	imageBody, err := ioutil.ReadAll(resp.Body)
 	checkError(err)
