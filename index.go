@@ -225,7 +225,7 @@ func parse(c *gin.Context) {
 
 	go grab(u, id)
 
-	c.JSON(http.StatusCreated, gin.H{"message": "processing", "jobId": id, "link": link})
+	c.JSON(http.StatusCreated, gin.H{"message": "processing", "id": id, "link": link})
 }
 
 func insertUrl(url string) int64 {
