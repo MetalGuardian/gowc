@@ -148,7 +148,8 @@
               "oneLineText": "string"
             },
             "name": "id",
-            "description": "The job id"
+            "description": "The job id",
+            "required": "true"
           },
           {
             "jsondocId": "e7a17ac6-cf85-4fd8-95fc-afead6a3d84d",
@@ -159,7 +160,8 @@
               "oneLineText": "string"
             },
             "name": "link",
-            "description": "The submitted link"
+            "description": "The submitted link",
+            "required": "true"
           },
           {
             "jsondocId": "e7a17ac6-cf85-4fd8-95fc-afead6a3d74d",
@@ -170,7 +172,8 @@
               "oneLineText": "string"
             },
             "name": "message",
-            "description": "The status message"
+            "description": "The status message",
+            "required": "true"
           }
         ],
         "visibility": "UNDEFINED",
@@ -179,6 +182,121 @@
           "id":100,
           "link": "http://example.com/",
           "message":"processing"
+        }
+      },
+      {
+        "jsondocId": "85eadda4-f41a-4bf7-af79-0ef343003b8a",
+        "name": "image",
+        "description": "An image object",
+        "fields": [
+          {
+            "jsondocId": "e7a17ac6-cf85-4fd8-95fc-ffead6a2d94d",
+            "jsondocType": {
+              "type": [
+                "string"
+              ],
+              "oneLineText": "string"
+            },
+            "name": "url",
+            "description": "The real image url",
+            "required": "true"
+          },
+          {
+            "jsondocId": "e7a27ac6-cf85-4fd8-95fc-afead6a2d94d",
+            "jsondocType": {
+              "type": [
+                "string"
+              ],
+              "oneLineText": "string"
+            },
+            "name": "link",
+            "description": "The parsed image link",
+            "required": "true"
+          },
+          {
+            "jsondocId": "e7a17ac6-ef85-4fd8-95fc-afead6a2d94d",
+            "jsondocType": {
+              "type": [
+                "string"
+              ],
+              "oneLineText": "string"
+            },
+            "name": "download",
+            "description": "The local url for image",
+            "required": "true"
+          },
+          {
+            "jsondocId": "e7a17ac6-cf85-4fd8-95fc-afeac6a2d94d",
+            "jsondocType": {
+              "type": [
+                "string"
+              ],
+              "oneLineText": "string"
+            },
+            "name": "status",
+            "description": "The status of the image parsing",
+            "required": "true"
+          },
+          {
+            "jsondocId": "e7a17ac6-cf87-4fd8-95fc-afead6a2d94d",
+            "jsondocType": {
+              "type": [
+                "string"
+              ],
+              "oneLineText": "string"
+            },
+            "name": "type",
+            "description": "The content type of the image",
+            "required": "true"
+          },
+          {
+            "jsondocId": "e7a17ac6-cf85-2fd8-95fc-afead6a2d94d",
+            "jsondocType": {
+              "type": [
+                "integer"
+              ],
+              "oneLineText": "integer"
+            },
+            "name": "size",
+            "description": "The size of the image in bytes",
+            "required": "true"
+          },
+          {
+            "jsondocId": "a1a17ac6-cf85-4fd8-95fc-afead6a2d94d",
+            "jsondocType": {
+              "type": [
+                "integer"
+              ],
+              "oneLineText": "integer"
+            },
+            "name": "height",
+            "description": "The height of the image in pixels",
+            "required": "true"
+          },
+          {
+            "jsondocId": "a1a17ac6-cf85-4dd8-95fc-afead6a2d94d",
+            "jsondocType": {
+              "type": [
+                "integer"
+              ],
+              "oneLineText": "integer"
+            },
+            "name": "width",
+            "description": "The width of the image in pixels",
+            "required": "true"
+          }
+        ],
+        "visibility": "UNDEFINED",
+        "stage": "UNDEFINED",
+        "jsondocTemplate": {
+          "url": "http://41.media.tumblr.com/6f84e0a2a18cb31958d2bb081da88087/tumblr_nuy3uncCKP1qcevfco1_500.jpg",
+          "link": "http://41.media.tumblr.com/6f84e0a2a18cb31958d2bb081da88087/tumblr_nuy3uncCKP1qcevfco1_500.jpg",
+          "download": "http://localhost:8080/files/15/1243.jpg",
+          "status": "done",
+          "type": "image/jpeg",
+          "size": 155208,
+          "height": 750,
+          "width": 500
         }
       }
     ]
