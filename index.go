@@ -17,7 +17,6 @@ import (
 	_ "image/jpeg"
 )
 
-var connectionString = os.Getenv("connectionString")
 var db, dbError = sql.Open("mysql", "root:@tcp(localhost:3306)/gowc?charset=utf8")
 
 const statusProcessing = 0
@@ -206,7 +205,7 @@ func checkError(err error) {
 }
 
 func index(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"use": []string{"http://localhost:8080/api"}, "message": "Hey! You can use such links"})
+	c.JSON(http.StatusOK, gin.H{"use": []string{"http://localhost:8080/doc/"}, "message": "Hey! You can use such links"})
 }
 
 func parse(c *gin.Context) {
