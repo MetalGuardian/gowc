@@ -43,3 +43,8 @@ read requests take ~2ms. All grabber tasks do in workers.
 
 3. Application can grab a lot of images, but now I don't implement any queue of grabbing tasks and
 now they have no limit per second or some other limitations.
+
+Other
+-----
+
+Testing GPG keys
